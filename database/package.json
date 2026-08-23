@@ -1,0 +1,11 @@
+{
+  "name": "movierec-database",
+  "version": "1.0.0",
+  "type": "module",
+  "description": "MovieRec database setup",
+  "main": "setup.js",
+  "dependencies": {
+    "dotenv": "^16.4.1",
+    "pg": "^8.11.3"
+  }
+}
