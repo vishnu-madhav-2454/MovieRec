@@ -3,7 +3,8 @@ import axios from 'axios';
 import { 
   auth, 
   googleProvider, 
-  signInWithPopup, 
+  signInWithRedirect,
+  getRedirectResult,
   signInWithEmailAndPassword, 
   createUserWithEmailAndPassword, 
   signOut, 
@@ -69,6 +70,10 @@ export function AuthProvider({ children }) {
       return;
     }
 
+    getRedirectResult(auth).catch((error) => {
+      console.error('Google sign-in redirect failed:', error);
+    });
+
     const unsubscribe = onAuthStateChanged(auth, async (firebaseUser) => {
       if (firebaseUser) {
         // Sync with database and get PostgreSQL user ID
@@ -111,32 +116,7 @@ export function AuthProvider({ children }) {
       throw new Error("Firebase Auth is not configured yet. Please provide your Firebase credentials.");
     }
     
-    try {
-      const result = await signInWithPopup(auth, googleProvider);
-      const firebaseUser = result.user;
-    
-      // Sync with database
-      const dbUser = await syncUserWithDatabase(firebaseUser);
-    
-      const userObj = {
-        id: dbUser.id,
-        uid: firebaseUser.uid,
-        displayName: dbUser.username || firebaseUser.displayName || 'Cinephile',
-        email: firebaseUser.email,
-        photoURL: dbUser.avatar_url || firebaseUser.photoURL,
-        bio: dbUser.bio || 'Film lover',
-        isGuest: false
-      };
-    
-      setCurrentUser(userObj);
-      localStorage.setItem('movierec_user', JSON.stringify(userObj));
-      return userObj;
-    } catch (error) {
-      if (error.code === 'auth/popup-closed-by-user' || error.code === 'auth/cancelled-popup-request') {
-        return null;
-      }
-      throw error;
-    }
+    await signInWithRedirect(auth, googleProvider);
   };
 
   const loginWithEmail = async (email, password) => {
