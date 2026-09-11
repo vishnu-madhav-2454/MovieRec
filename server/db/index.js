@@ -32,7 +32,12 @@ pool.connect()
   .then(client => {
     console.log('✅ Database connected successfully');
     client.release();
+    return pool.query(`
+      ALTER TABLE direct_messages
+      ADD COLUMN IF NOT EXISTS review_id INTEGER REFERENCES reviews(id) ON DELETE CASCADE
+    `);
   })
+  .then(() => console.log('✅ Database compatibility checks complete'))
   .catch(err => {
     console.error('❌ Database connection error:', err.message);
   });

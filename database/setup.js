@@ -201,9 +201,15 @@ const createTables = async () => {
         receiver_id INTEGER REFERENCES users(id) ON DELETE CASCADE,
         content TEXT NOT NULL,
         meme_id INTEGER REFERENCES memes(id) ON DELETE SET NULL,
+        review_id INTEGER REFERENCES reviews(id) ON DELETE CASCADE,
         is_read BOOLEAN DEFAULT FALSE,
         created_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP
       )
+    `);
+
+    await client.query(`
+      ALTER TABLE direct_messages
+      ADD COLUMN IF NOT EXISTS review_id INTEGER REFERENCES reviews(id) ON DELETE CASCADE
     `);
 
     // Notifications table
