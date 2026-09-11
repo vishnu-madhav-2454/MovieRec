@@ -43,6 +43,7 @@ if (isConfigured) {
     auth = getAuth(app);
     storage = getStorage(app);
     googleProvider = new GoogleAuthProvider();
+    googleProvider.setCustomParameters({ prompt: 'select_account' });
   } catch (error) {
     console.warn("Firebase initialization error:", error.message);
   }
