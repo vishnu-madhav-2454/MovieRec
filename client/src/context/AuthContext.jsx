@@ -4,6 +4,7 @@ import {
   auth, 
   googleProvider, 
   signInWithRedirect,
+  getRedirectResult,
   signInWithEmailAndPassword, 
   createUserWithEmailAndPassword, 
   signOut, 
@@ -68,6 +69,10 @@ export function AuthProvider({ children }) {
       setLoading(false);
       return;
     }
+
+    getRedirectResult(auth).catch((error) => {
+      console.error('Google sign-in redirect failed:', error);
+    });
 
     const unsubscribe = onAuthStateChanged(auth, async (firebaseUser) => {
       if (firebaseUser) {
