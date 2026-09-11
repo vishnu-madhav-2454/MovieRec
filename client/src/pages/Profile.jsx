@@ -46,7 +46,7 @@ function Profile() {
           axios.get('/api/users/' + userId).catch(() => ({ data: null })),
           axios.get('/api/users/' + userId + '/stats').catch(() => ({ data: null })),
           axios.get('/api/reviews/user/' + userId).catch(() => ({ data: [] })),
-          axios.get('/api/watchlist/' + userId).catch(() => ({ data: [] })),
+          axios.get('/api/watchlist/user/' + userId).catch(() => ({ data: [] })),
           axios.get('/api/users/' + userId + '/watched').catch(() => ({ data: [] })),
           axios.get('/api/users/' + userId + '/favorites').catch(() => ({ data: [] })),
           axios.get('/api/lists/user/' + userId).catch(() => ({ data: [] })),

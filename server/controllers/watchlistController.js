@@ -12,7 +12,7 @@ class WatchlistController {
   static async getUserWatchlist(req, res) {
     try {
       const { userId } = req.params;
-      const watchlist = await WatchlistModel.findByUserId(userId);
+      const watchlist = await WatchlistModel.getUserWatchlist(userId);
       res.json(watchlist);
     } catch (error) {
       console.error('Error in getUserWatchlist:', error.message);
@@ -35,18 +35,14 @@ class WatchlistController {
         });
       }
 
-      const result = await WatchlistModel.add({
+      const result = await WatchlistModel.addToWatchlist(
         user_id,
         movie_id,
         movie_title,
         poster_path
-      });
+      );
 
-      if (result.error) {
-        return res.status(409).json({ error: result.error });
-      }
-
-      res.status(201).json(result.data);
+      res.status(201).json(result);
     } catch (error) {
       console.error('Error in addToWatchlist:', error.message);
       res.status(500).json({ error: 'Failed to add to watchlist' });
@@ -61,10 +57,10 @@ class WatchlistController {
     try {
       const { userId, movieId } = req.params;
 
-      const result = await WatchlistModel.remove(userId, movieId);
+      const removed = await WatchlistModel.removeFromWatchlist(userId, movieId);
 
-      if (result.error) {
-        return res.status(404).json({ error: result.error });
+      if (!removed) {
+        return res.status(404).json({ error: 'Movie not found in watchlist' });
       }
 
       res.json({ message: 'Removed from watchlist' });
@@ -96,7 +92,7 @@ class WatchlistController {
   static async clearWatchlist(req, res) {
     try {
       const { userId } = req.params;
-      const count = await WatchlistModel.clearUserWatchlist(userId);
+      const count = await WatchlistModel.clearWatchlist(userId);
       res.json({ 
         message: `Cleared ${count} items from watchlist` 
       });

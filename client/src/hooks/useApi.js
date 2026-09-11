@@ -107,7 +107,7 @@ export const apiHelpers = {
   updateProfile: (data) => api.put('/users/me', data),
   
   // Watchlist operations
-  getWatchlist: (userId) => api.get(`/watchlist/${userId}`),
+  getWatchlist: (userId) => api.get(`/watchlist/user/${userId}`),
   addToWatchlist: (movieId, movieTitle, posterPath) => 
     api.post('/watchlist', { movie_id: movieId, movie_title: movieTitle, poster_path: posterPath }),
   removeFromWatchlist: (movieId) => api.delete(`/watchlist/movie/${movieId}`),
