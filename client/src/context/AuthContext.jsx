@@ -3,6 +3,7 @@ import axios from 'axios';
 import { 
   auth, 
   googleProvider, 
+  signInWithPopup,
   signInWithRedirect,
   getRedirectResult,
   signInWithEmailAndPassword, 
@@ -70,9 +71,28 @@ export function AuthProvider({ children }) {
       return;
     }
 
-    getRedirectResult(auth).catch((error) => {
-      console.error('Google sign-in redirect failed:', error);
-    });
+    // Handle redirect result on page load (fallback if popup was blocked)
+    getRedirectResult(auth)
+      .then(async (result) => {
+        if (result?.user) {
+          const firebaseUser = result.user;
+          const dbUser = await syncUserWithDatabase(firebaseUser);
+          const userObj = {
+            id: dbUser.id,
+            uid: firebaseUser.uid,
+            displayName: dbUser.username || firebaseUser.displayName || 'Cinephile',
+            email: firebaseUser.email,
+            photoURL: dbUser.avatar_url || firebaseUser.photoURL,
+            bio: dbUser.bio || 'Film enthusiast & critic',
+            isGuest: false
+          };
+          setCurrentUser(userObj);
+          localStorage.setItem('movierec_user', JSON.stringify(userObj));
+        }
+      })
+      .catch((error) => {
+        console.error('Google sign-in redirect failed:', error);
+      });
 
     const unsubscribe = onAuthStateChanged(auth, async (firebaseUser) => {
       if (firebaseUser) {
@@ -116,7 +136,31 @@ export function AuthProvider({ children }) {
       throw new Error("Firebase Auth is not configured yet. Please provide your Firebase credentials.");
     }
     
-    await signInWithRedirect(auth, googleProvider);
+    // Use popup (more reliable on deployed/hosted sites than redirect)
+    try {
+      const result = await signInWithPopup(auth, googleProvider);
+      const firebaseUser = result.user;
+      const dbUser = await syncUserWithDatabase(firebaseUser);
+      const userObj = {
+        id: dbUser.id,
+        uid: firebaseUser.uid,
+        displayName: dbUser.username || firebaseUser.displayName || 'Cinephile',
+        email: firebaseUser.email,
+        photoURL: dbUser.avatar_url || firebaseUser.photoURL,
+        bio: dbUser.bio || 'Film enthusiast & critic',
+        isGuest: false
+      };
+      setCurrentUser(userObj);
+      localStorage.setItem('movierec_user', JSON.stringify(userObj));
+      return userObj;
+    } catch (popupError) {
+      // If popup is blocked, fall back to redirect
+      if (popupError.code === 'auth/popup-blocked') {
+        await signInWithRedirect(auth, googleProvider);
+        return; // Page will reload after redirect
+      }
+      throw popupError;
+    }
   };
 
   const loginWithEmail = async (email, password) => {

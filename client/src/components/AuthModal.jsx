@@ -34,9 +34,14 @@ function AuthModal() {
         return;
       }
       await loginWithGoogle();
+      // With popup flow, loginWithGoogle() resolves after sign-in completes
+      // With redirect fallback, the page reloads so this line won't run
       setAuthModalOpen(false);
     } catch (err) {
-      setError(err.message || 'Failed to sign in with Google');
+      // Don't show error if user simply closed the popup
+      if (err.code !== 'auth/popup-closed-by-user' && err.code !== 'auth/cancelled-popup-request') {
+        setError(err.message || 'Failed to sign in with Google');
+      }
     } finally {
       setSubmitting(false);
     }
