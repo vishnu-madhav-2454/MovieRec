@@ -97,12 +97,12 @@ export default function ReviewCard({ review, currentUser, onLikeToggle, onHelpfu
   const spoilerWarning = hasSpoilers ? getSpoilerWarning(spoilerCheck?.riskLevel) : '';
 
   return (
-    <div className="bg-dark-900/60 border border-dark-800 rounded-2xl p-4 sm:p-5 hover:border-dark-700 transition-all shadow-lg">
+    <div className="bg-dark-900 border border-dark-800 rounded-3xl p-4 sm:p-5 hover:border-primary-200 transition-all shadow-[0_8px_24px_rgba(67,55,43,0.05)]">
       <div className="flex items-start justify-between gap-3 sm:gap-4 mb-3">
         <div className="flex items-center gap-2 sm:gap-3 min-w-0 flex-1">
           <Link
             to={'/profile/' + (review.user_id || 1)}
-            className="w-8 h-8 sm:w-10 sm:h-10 rounded-full bg-gradient-to-br from-primary-600 to-amber-600 flex items-center justify-center font-bold text-white text-xs sm:text-sm shrink-0"
+            className="w-8 h-8 sm:w-10 sm:h-10 rounded-full bg-primary-100 border border-primary-200 flex items-center justify-center font-bold text-primary-700 text-xs sm:text-sm shrink-0"
           >
             {username.charAt(0).toUpperCase()}
           </Link>
@@ -127,22 +127,12 @@ export default function ReviewCard({ review, currentUser, onLikeToggle, onHelpfu
             </div>
           </div>
         </div>
-        <div className="flex items-center gap-1 bg-dark-950/80 px-2 sm:px-3 py-1 sm:py-1.5 rounded-xl border border-dark-800 shrink-0">
+        <div className="flex items-center gap-1 bg-primary-50 px-2 sm:px-3 py-1 sm:py-1.5 rounded-xl border border-primary-100 shrink-0">
           <FiStar className="w-3.5 h-3.5 sm:w-4 sm:h-4 text-amber-400 fill-amber-400" />
           <span className="font-bold text-amber-300 text-xs sm:text-sm">{review.rating}</span>
           <span className="text-dark-500 text-[10px] sm:text-xs">/ 5</span>
         </div>
       </div>
-
-      {review.vibes?.length > 0 && (
-        <div className="flex flex-wrap gap-1.5 mb-3">
-          {review.vibes.map((vibe) => (
-            <span key={vibe} className="text-[10px] sm:text-xs bg-primary-950/40 text-primary-300 border border-primary-900/50 px-2 sm:px-2.5 py-0.5 rounded-full">
-              #{vibe}
-            </span>
-          ))}
-        </div>
-      )}
 
       <div className="my-3">
         {hasSpoilers && !showSpoiler ? (

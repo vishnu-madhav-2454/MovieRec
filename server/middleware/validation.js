@@ -37,7 +37,6 @@ export const reviewSchemas = {
     user_id: Joi.number().integer().positive().required(),
     username: Joi.string().max(50),
     user_avatar: Joi.string().uri().allow(null),
-    movie_id: Joi.number().integer().positive().required(),
     movie_title: Joi.string().max(255).required(),
     movie_poster: Joi.string().allow(null),
     rating: Joi.number().min(0).max(5).required(),

@@ -20,17 +20,6 @@ import {
 } from 'react-icons/fi';
 import { SiThemoviedatabase } from 'react-icons/si';
 
-const VIBE_OPTIONS = [
-  'Masterpiece',
-  'Mind-Bending',
-  'Emotional Wreck',
-  'Slow Burn',
-  'Visual Feast',
-  'Underrated',
-  'Great Score',
-  'Dark & Gritty'
-];
-
 function MovieDetail() {
   const { id } = useParams();
   const { currentUser, openAuthModal } = useAuth();
@@ -39,11 +28,11 @@ function MovieDetail() {
   const [communityReviews, setCommunityReviews] = useState([]);
   const [communityStats, setCommunityStats] = useState({ average_rating: 0, review_count: 0 });
   const [loading, setLoading] = useState(true);
+  const [loadError, setLoadError] = useState(false);
   const [inWatchlist, setInWatchlist] = useState(false);
   const [reviewSort, setReviewSort] = useState('popular');
   const [userRating, setUserRating] = useState(0);
   const [reviewContent, setReviewContent] = useState('');
-  const [selectedVibes, setSelectedVibes] = useState([]);
   const [hasSpoilersManual, setHasSpoilersManual] = useState(false);
   const [spoilerWarning, setSpoilerWarning] = useState(null);
   const [showReviewForm, setShowReviewForm] = useState(false);
@@ -53,6 +42,7 @@ function MovieDetail() {
     async function load() {
       try {
         setLoading(true);
+        setLoadError(false);
         const uid = currentUser?.id || 1;
         const [movieRes, recRes, watchRes, reviewsRes, statsRes] = await Promise.all([
           axios.get('/api/movies/' + id),
@@ -72,6 +62,7 @@ function MovieDetail() {
         });
       } catch (error) {
         console.error(error);
+        setLoadError(true);
       } finally {
         setLoading(false);
       }
@@ -123,19 +114,16 @@ function MovieDetail() {
         user_id: currentUser?.id || 1,
         username: currentUser?.displayName || currentUser?.username || 'MovieBuff',
         user_avatar: currentUser?.photoURL || null,
-        movie_id: movie.id,
         movie_title: movie.title,
         movie_poster: movie.poster_path || null,
         rating: userRating,
         content: reviewContent.trim(),
-        vibes: selectedVibes,
         has_spoilers: isSpoiler
       };
-      const res = await axios.post('/api/reviews', payload);
+      const res = await axios.post('/api/reviews/movie/' + movie.id, payload);
       setCommunityReviews((prev) => [res.data, ...prev.filter((r) => r.user_id !== (currentUser?.id || 1))]);
       setShowReviewForm(false);
       setReviewContent('');
-      setSelectedVibes([]);
       setSpoilerWarning(null);
       setHasSpoilersManual(false);
     } catch (error) {
@@ -146,7 +134,18 @@ function MovieDetail() {
   };
 
   if (loading) return <Loading />;
-  if (!movie) return <div className="text-center py-20">Movie not found</div>;
+  if (loadError || !movie) {
+    return (
+      <div className="min-h-[60vh] flex items-center justify-center px-6 text-center">
+        <div className="max-w-md bg-dark-900 border border-dark-800 rounded-3xl p-8 shadow-sm">
+          <FiFilm className="w-10 h-10 text-primary-500 mx-auto mb-4" />
+          <h2 className="text-xl font-extrabold mb-2">Movie details unavailable</h2>
+          <p className="text-sm text-dark-400 mb-5">The movie service did not respond. Try again when the server is back online.</p>
+          <button type="button" onClick={() => window.location.reload()} className="px-5 py-2.5 rounded-xl bg-primary-500 text-white font-bold text-sm hover:bg-primary-600">Try again</button>
+        </div>
+      </div>
+    );
+  }
 
   const backdropUrl = movie.backdrop_path ? 'https://image.tmdb.org/t/p/original' + movie.backdrop_path : null;
   const posterUrl = movie.poster_path
@@ -175,7 +174,7 @@ function MovieDetail() {
       </div>
 
       <div className="relative -mt-64 px-4 sm:px-6 lg:px-8 max-w-7xl mx-auto">
-        <div className="grid md:grid-cols-[280px_1fr] gap-8 lg:gap-12">
+        <div className="grid md:grid-cols-[280px_minmax(0,1fr)] gap-8 lg:gap-12">
           <div>
             <div className="rounded-2xl overflow-hidden shadow-2xl border border-dark-700 aspect-[2/3]">
               <img src={posterUrl} alt={movie.title} className="w-full h-full object-cover" />
@@ -218,26 +217,6 @@ function MovieDetail() {
                       <FiStar className={'w-7 h-7 ' + (star <= userRating ? 'text-amber-400 fill-amber-400' : 'text-dark-600')} />
                     </button>
                   ))}
-                </div>
-                <div className="flex flex-wrap gap-1 mb-3">
-                  {VIBE_OPTIONS.map((vibe) => {
-                    const active = selectedVibes.includes(vibe);
-                    return (
-                      <button
-                        type="button"
-                        key={vibe}
-                        onClick={() =>
-                          setSelectedVibes(active ? selectedVibes.filter((v) => v !== vibe) : [...selectedVibes, vibe])
-                        }
-                        className={
-                          'text-[10px] px-2 py-0.5 rounded-full border ' +
-                          (active ? 'bg-primary-600 border-primary-500' : 'bg-dark-950 border-dark-800')
-                        }
-                      >
-                        {vibe}
-                      </button>
-                    );
-                  })}
                 </div>
                 <textarea
                   rows={3}

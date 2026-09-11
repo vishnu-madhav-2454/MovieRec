@@ -50,7 +50,6 @@
 │  └─ ...                   └─ ...                             │
 │                                                               │
 │  Middleware/               Models/                           │
-│  ├─ rateLimiter.js        ├─ userModel.js                   │
 │  ├─ validation.js         ├─ reviewModel.js                 │
 │  └─ auth.js               ├─ followModel.js ✨              │
 │                            ├─ memeModel.js                   │
@@ -93,7 +92,6 @@
             │  - Session management              │
             │  - Cached user profiles            │
             │  - Cached trending movies          │
-            │  - Rate limiting counters          │
             │  - Online user status              │
             │                                     │
             └────────────────────────────────────┘
@@ -450,14 +448,7 @@ CREATE INDEX idx_notif_created ON notifications(created_at DESC);
                │
                ▼
 ┌─────────────────────────────────────┐
-│   API Rate Limiting                 │
-│   - 100 requests/15min per IP       │
-│   - Prevents brute force            │
-└──────────────┬──────────────────────┘
-               │
-               ▼
-┌─────────────────────────────────────┐
-│   Input Validation (Joi)            │
+│   Input Validation (Joi)             │
 │   - Schema validation               │
 │   - Type checking                   │
 │   - Length limits                   │
@@ -590,7 +581,6 @@ CREATE INDEX idx_memes_created ON memes(created_at DESC);
 - **Database:** PostgreSQL 15
 - **ORM:** Raw SQL with pg library
 - **Validation:** Joi
-- **Rate Limiting:** express-rate-limit
 - **Security:** Helmet, CORS
 
 ### External Services
@@ -670,6 +660,6 @@ MovieRec/
 This architecture is designed for:
 - ✅ Scalability (can handle 100k+ users)
 - ✅ Performance (indexed queries, caching ready)
-- ✅ Security (validation, rate limiting, constraints)
+- ✅ Security (validation, constraints)
 - ✅ Maintainability (clear separation of concerns)
 - ✅ Extensibility (easy to add new features)

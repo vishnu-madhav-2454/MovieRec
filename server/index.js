@@ -15,9 +15,6 @@ import listRoutes from './routes/listRoutes.js';
 import notificationRoutes from './routes/notificationRoutes.js';
 import followRoutes from './routes/followRoutes.js';
 
-// Import middleware
-import { apiLimiter } from './middleware/rateLimiter.js';
-
 dotenv.config();
 
 const app = express();
@@ -27,9 +24,6 @@ const PORT = process.env.PORT || 3001;
 app.use(cors());
 app.use(express.json({ limit: '20mb' }));
 app.use(express.urlencoded({ extended: true, limit: '20mb' }));
-
-// Apply rate limiting to all API routes
-app.use('/api', apiLimiter);
 
 // Routes
 app.use('/api/movies', movieRoutes);
@@ -58,6 +52,5 @@ app.use((err, req, res, next) => {
 app.listen(PORT, () => {
   console.log(`🎬 MovieRec server running on http://localhost:${PORT}`);
   console.log('📝 MVC Architecture Mode');
-  console.log('🔒 Rate limiting enabled');
   console.log('✅ Input validation active');
 });

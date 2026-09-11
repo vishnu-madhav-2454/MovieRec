@@ -46,7 +46,7 @@ function Profile() {
           axios.get('/api/users/' + userId).catch(() => ({ data: null })),
           axios.get('/api/users/' + userId + '/stats').catch(() => ({ data: null })),
           axios.get('/api/reviews/user/' + userId).catch(() => ({ data: [] })),
-          axios.get('/api/watchlist/' + userId).catch(() => ({ data: [] })),
+          axios.get('/api/watchlist/user/' + userId).catch(() => ({ data: [] })),
           axios.get('/api/users/' + userId + '/watched').catch(() => ({ data: [] })),
           axios.get('/api/users/' + userId + '/favorites').catch(() => ({ data: [] })),
           axios.get('/api/lists/user/' + userId).catch(() => ({ data: [] })),
@@ -124,12 +124,21 @@ function Profile() {
 
   return (
     <div className="min-h-screen px-3 sm:px-4 md:px-6 lg:px-8 max-w-7xl mx-auto py-6 sm:py-8 md:py-10 animate-fade-in text-white pb-20 md:pb-10">
-      <div className="bg-dark-900/60 border border-dark-800 rounded-2xl sm:rounded-3xl p-3 sm:p-4 md:p-6 lg:p-8 backdrop-blur-md mb-6 sm:mb-8">
+      <div className="relative overflow-hidden bg-dark-900 border border-dark-800 border-t-4 border-t-primary-500 rounded-3xl p-4 sm:p-6 md:p-8 mb-6 sm:mb-8 shadow-[0_16px_40px_rgba(67,55,43,0.07)]">
+        <div className="absolute right-0 top-0 w-40 h-40 bg-primary-100/60 rounded-bl-[100%] pointer-events-none" />
         <div className="flex flex-col md:flex-row items-center md:items-start justify-between gap-3 sm:gap-4 md:gap-6">
           <div className="flex flex-col sm:flex-row items-center gap-3 sm:gap-4 md:gap-6 text-center sm:text-left w-full md:w-auto">
-            <div className="w-16 h-16 sm:w-20 sm:h-20 md:w-24 md:h-24 lg:w-28 lg:h-28 rounded-full bg-gradient-to-tr from-primary-600 via-rose-600 to-amber-500 flex items-center justify-center text-2xl sm:text-3xl md:text-4xl font-black text-white shadow-2xl ring-2 sm:ring-4 ring-dark-800 shrink-0">
+            <div className="w-16 h-16 sm:w-20 sm:h-20 md:w-24 md:h-24 lg:w-28 lg:h-28 rounded-full bg-primary-100 border-4 border-white flex items-center justify-center text-2xl sm:text-3xl md:text-4xl font-black text-primary-700 shadow-xl shrink-0 overflow-hidden">
               {user.avatar_url ? (
-                <img src={user.avatar_url} alt={user.username} className="w-full h-full rounded-full object-cover" />
+                <img
+                  src={user.avatar_url}
+                  alt={user.username}
+                  className="w-full h-full rounded-full object-cover"
+                  onError={(event) => {
+                    event.currentTarget.style.display = 'none';
+                    event.currentTarget.parentElement.textContent = user.username?.charAt(0).toUpperCase() || 'U';
+                  }}
+                />
               ) : (
                 user.username?.charAt(0).toUpperCase()
               )}
@@ -138,15 +147,15 @@ function Profile() {
             <div className="flex-1 min-w-0 w-full sm:w-auto">
               <div className="flex flex-wrap items-center justify-center sm:justify-start gap-1.5 sm:gap-2 md:gap-3 mb-1.5 sm:mb-2">
                 <h1 className="text-lg sm:text-xl md:text-2xl lg:text-3xl font-black tracking-tight text-white truncate max-w-[200px] sm:max-w-none">{user.username}</h1>
-                <span className="bg-primary-950 text-primary-400 border border-primary-800/80 text-[9px] sm:text-[10px] uppercase font-bold px-1.5 sm:px-2 md:px-2.5 py-0.5 rounded-full shrink-0">
+                <span className="bg-primary-50 text-primary-700 border border-primary-200 text-[9px] sm:text-[10px] uppercase tracking-wider font-extrabold px-2.5 py-1 rounded-full shrink-0">
                   Pro Cinephile
                 </span>
               </div>
               <p className="text-dark-300 text-[11px] sm:text-xs md:text-sm max-w-lg mb-2 sm:mb-3 md:mb-4 leading-relaxed font-normal px-1 sm:px-0">{user.bio}</p>
               
-              <div className="flex items-center justify-center sm:justify-start gap-2 sm:gap-4 md:gap-6 text-center flex-wrap">
+              <div className="flex items-center justify-center sm:justify-start gap-2 sm:gap-4 md:gap-6 text-center flex-wrap pt-2">
                 <div className="min-w-[50px] sm:min-w-[60px]">
-                  <span className="text-base sm:text-lg md:text-xl font-black text-white block">{stats?.watched || watchedFilms.length}</span>
+                  <span className="text-base sm:text-lg md:text-xl font-black text-dark-100 block">{stats?.watched || watchedFilms.length}</span>
                   <span className="text-[9px] sm:text-[10px] md:text-[11px] font-bold text-dark-500 uppercase tracking-wider">Films</span>
                 </div>
                 <div className="min-w-[50px] sm:min-w-[60px]">
@@ -178,7 +187,7 @@ function Profile() {
               {isFollowing ? 'Following' : 'Follow User'}
             </button>
           ) : (
-            <div className="flex items-center gap-2 shrink-0">
+            <div className="flex items-center gap-2 shrink-0 relative z-10">
               <button
                 onClick={() => navigate(`/settings`)}
                 className="px-3 sm:px-4 py-2 rounded-xl font-bold text-xs flex items-center gap-2 bg-dark-800 hover:bg-dark-700 text-dark-300 hover:text-white border border-dark-700 transition-all"
@@ -203,10 +212,10 @@ function Profile() {
         </div>
       </div>
 
-      <div className="flex border-b border-dark-800 mb-8 overflow-x-auto scrollbar-none gap-1 sm:gap-2">
+      <div className="flex bg-dark-900 border border-dark-800 rounded-2xl p-1 mb-8 overflow-x-auto scrollbar-none gap-1 shadow-sm">
         <button
           onClick={() => setActiveTab('films')}
-          className={'flex items-center gap-1.5 sm:gap-2 px-3 sm:px-5 py-2.5 sm:py-3 text-xs sm:text-sm font-bold border-b-2 transition-all whitespace-nowrap ' + (activeTab === 'films' ? 'border-primary-500 text-primary-400 bg-dark-900/30' : 'border-transparent text-dark-400 hover:text-white')}
+          className={'flex items-center gap-1.5 sm:gap-2 px-3 sm:px-5 py-2.5 sm:py-3 text-xs sm:text-sm font-bold rounded-xl transition-all whitespace-nowrap ' + (activeTab === 'films' ? 'text-primary-700 bg-primary-50' : 'text-dark-400 hover:text-white hover:bg-dark-800')}
         >
           <FiFilm className="w-3.5 h-3.5 sm:w-4 sm:h-4" /> 
           <span className="hidden xs:inline">Diary & </span>Films ({stats?.watched || watchedFilms.length})
@@ -214,28 +223,28 @@ function Profile() {
 
         <button
           onClick={() => setActiveTab('reviews')}
-          className={'flex items-center gap-1.5 sm:gap-2 px-3 sm:px-5 py-2.5 sm:py-3 text-xs sm:text-sm font-bold border-b-2 transition-all whitespace-nowrap ' + (activeTab === 'reviews' ? 'border-primary-500 text-primary-400 bg-dark-900/30' : 'border-transparent text-dark-400 hover:text-white')}
+          className={'flex items-center gap-1.5 sm:gap-2 px-3 sm:px-5 py-2.5 sm:py-3 text-xs sm:text-sm font-bold rounded-xl transition-all whitespace-nowrap ' + (activeTab === 'reviews' ? 'text-primary-700 bg-primary-50' : 'text-dark-400 hover:text-white hover:bg-dark-800')}
         >
           <FiStar className="w-3.5 h-3.5 sm:w-4 sm:h-4" /> Reviews ({reviews.length})
         </button>
 
         <button
           onClick={() => setActiveTab('lists')}
-          className={'flex items-center gap-1.5 sm:gap-2 px-3 sm:px-5 py-2.5 sm:py-3 text-xs sm:text-sm font-bold border-b-2 transition-all whitespace-nowrap ' + (activeTab === 'lists' ? 'border-primary-500 text-primary-400 bg-dark-900/30' : 'border-transparent text-dark-400 hover:text-white')}
+          className={'flex items-center gap-1.5 sm:gap-2 px-3 sm:px-5 py-2.5 sm:py-3 text-xs sm:text-sm font-bold rounded-xl transition-all whitespace-nowrap ' + (activeTab === 'lists' ? 'text-primary-700 bg-primary-50' : 'text-dark-400 hover:text-white hover:bg-dark-800')}
         >
           <FiList className="w-3.5 h-3.5 sm:w-4 sm:h-4" /> Lists ({customLists.length})
         </button>
 
         <button
           onClick={() => setActiveTab('following')}
-          className={'flex items-center gap-1.5 sm:gap-2 px-3 sm:px-5 py-2.5 sm:py-3 text-xs sm:text-sm font-bold border-b-2 transition-all whitespace-nowrap ' + (activeTab === 'following' ? 'border-primary-500 text-primary-400 bg-dark-900/30' : 'border-transparent text-dark-400 hover:text-white')}
+          className={'flex items-center gap-1.5 sm:gap-2 px-3 sm:px-5 py-2.5 sm:py-3 text-xs sm:text-sm font-bold rounded-xl transition-all whitespace-nowrap ' + (activeTab === 'following' ? 'text-primary-700 bg-primary-50' : 'text-dark-400 hover:text-white hover:bg-dark-800')}
         >
           <FiUsers className="w-3.5 h-3.5 sm:w-4 sm:h-4" /> Following ({stats?.following || followingList.length})
         </button>
 
         <button
           onClick={() => setActiveTab('followers')}
-          className={'flex items-center gap-1.5 sm:gap-2 px-3 sm:px-5 py-2.5 sm:py-3 text-xs sm:text-sm font-bold border-b-2 transition-all whitespace-nowrap ' + (activeTab === 'followers' ? 'border-primary-500 text-primary-400 bg-dark-900/30' : 'border-transparent text-dark-400 hover:text-white')}
+          className={'flex items-center gap-1.5 sm:gap-2 px-3 sm:px-5 py-2.5 sm:py-3 text-xs sm:text-sm font-bold rounded-xl transition-all whitespace-nowrap ' + (activeTab === 'followers' ? 'text-primary-700 bg-primary-50' : 'text-dark-400 hover:text-white hover:bg-dark-800')}
         >
           <FiUsers className="w-3.5 h-3.5 sm:w-4 sm:h-4" /> Followers ({stats?.followers || followersList.length})
         </button>
@@ -277,7 +286,7 @@ function Profile() {
           </div>
 
           {watchedFilms.length === 0 ? (
-            <div className="text-center py-12 bg-dark-900/40 rounded-2xl border border-dark-800">
+            <div className="text-center py-16 px-6 bg-dark-900 rounded-3xl border border-dark-800 shadow-sm">
               <FiFilm className="w-10 h-10 text-dark-600 mx-auto mb-2" />
               <p className="text-dark-300 font-semibold text-sm">No films logged yet</p>
               <p className="text-dark-500 text-xs mt-1">Start tracking films you've watched</p>

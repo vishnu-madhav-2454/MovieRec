@@ -1,6 +1,6 @@
 import { useState, useEffect } from 'react';
 import axios from 'axios';
-import { FiX, FiSend, FiCheck } from 'react-icons/fi';
+import { FiX, FiSend, FiCheck, FiUsers, FiFilm } from 'react-icons/fi';
 
 export default function DmDrawer({ isOpen, onClose, currentUser, memeToSend, reviewToSend, onSent }) {
   const [followingUsers, setFollowingUsers] = useState([
@@ -77,22 +77,23 @@ export default function DmDrawer({ isOpen, onClose, currentUser, memeToSend, rev
   };
 
   return (
-    <div className="fixed inset-0 z-50 flex justify-end bg-black/70 backdrop-blur-sm">
-      <div className="w-full max-w-md bg-dark-900 border-l border-dark-800 h-full flex flex-col p-6 shadow-2xl">
+    <div className="fixed inset-0 z-50 flex justify-end bg-black/25 backdrop-blur-sm">
+      <div className="w-full max-w-lg bg-dark-900 border-l border-dark-800 h-full flex flex-col p-5 sm:p-7 shadow-2xl rounded-l-[2rem]">
         <div className="flex items-center justify-between pb-4 border-b border-dark-800">
           <div>
-            <h3 className="text-xl font-bold text-white flex items-center gap-2">
-              <FiSend className="w-5 h-5 text-primary-500" /> Send via DM
+            <p className="font-mono text-[10px] uppercase tracking-[0.2em] text-primary-600 mb-1">Share the feeling</p>
+            <h3 className="text-2xl font-extrabold text-white flex items-center gap-2 tracking-tight">
+              Send to a friend
             </h3>
-            <p className="text-xs text-dark-400 mt-0.5">Share with people in the community</p>
+            <p className="text-xs text-dark-400 mt-1">Pass this moment along to someone in your film circle.</p>
           </div>
-          <button type="button" onClick={onClose} className="p-2 text-dark-400 hover:text-white rounded-lg hover:bg-dark-800">
+          <button type="button" onClick={onClose} className="p-2.5 text-dark-400 hover:text-white rounded-xl hover:bg-dark-800" title="Close">
             <FiX className="w-5 h-5" />
           </button>
         </div>
 
         {memeToSend && (
-          <div className="mt-4 p-3 bg-dark-950/80 rounded-xl border border-dark-800 flex gap-3 items-center">
+          <div className="mt-5 p-4 bg-primary-50 rounded-2xl border border-primary-100 flex gap-3 items-center">
             {image && <img src={image} alt="Meme" className="w-14 h-14 rounded-lg object-cover border border-dark-700" />}
             <div className="flex-1 min-w-0">
               <span className="text-[11px] font-bold text-primary-400 uppercase tracking-wider block">
@@ -104,7 +105,7 @@ export default function DmDrawer({ isOpen, onClose, currentUser, memeToSend, rev
         )}
 
         {reviewToSend && (
-          <div className="mt-4 p-3 bg-dark-950/80 rounded-xl border border-dark-800 flex gap-3 items-center">
+          <div className="mt-5 p-4 bg-dark-950 rounded-2xl border border-dark-800 flex gap-3 items-center">
             {reviewToSend.movie_poster && (
               <img 
                 src={`https://image.tmdb.org/t/p/w200${reviewToSend.movie_poster}`} 
@@ -126,7 +127,7 @@ export default function DmDrawer({ isOpen, onClose, currentUser, memeToSend, rev
         )}
 
         <div className="mt-5 flex-1 overflow-y-auto">
-          <label className="text-xs font-semibold text-dark-400 uppercase tracking-wider block mb-2">Recipient</label>
+          <label className="flex items-center gap-2 text-xs font-extrabold text-dark-400 uppercase tracking-wider mb-3"><FiUsers className="text-primary-500" /> Choose a recipient</label>
           <div className="space-y-2">
             {followingUsers.map((u) => {
               const selected = selectedUser?.id === u.id;
@@ -136,11 +137,11 @@ export default function DmDrawer({ isOpen, onClose, currentUser, memeToSend, rev
                   key={u.id}
                   onClick={() => setSelectedUser(u)}
                   className={`w-full flex items-center justify-between p-3 rounded-xl border transition-all ${
-                    selected ? 'border-primary-500 bg-primary-950/40' : 'border-dark-800 bg-dark-950 hover:border-dark-700'
+                    selected ? 'border-primary-400 bg-primary-50' : 'border-dark-800 bg-dark-950 hover:border-primary-200'
                   }`}
                 >
                   <div className="flex items-center gap-3 text-left">
-                    <div className="w-9 h-9 rounded-full bg-gradient-to-tr from-primary-600 to-indigo-600 flex items-center justify-center text-white font-bold text-xs">
+                    <div className="w-10 h-10 rounded-full bg-primary-100 border border-primary-200 flex items-center justify-center text-primary-700 font-bold text-xs">
                       {(u.username || 'U').charAt(0)}
                     </div>
                     <div>
@@ -165,13 +166,13 @@ export default function DmDrawer({ isOpen, onClose, currentUser, memeToSend, rev
             value={messageText}
             onChange={(e) => setMessageText(e.target.value)}
             placeholder="Add a message..."
-            className="w-full bg-dark-950 border border-dark-800 rounded-xl p-3 text-sm text-white placeholder-dark-500 focus:outline-none focus:border-primary-500 resize-none"
+            className="w-full bg-dark-950 border border-dark-800 rounded-2xl p-3.5 text-sm text-white placeholder-dark-500 focus:outline-none focus:border-primary-500 resize-none"
           />
           <button
             type="button"
             onClick={handleSend}
             disabled={!selectedUser || sending}
-            className="w-full py-3 rounded-xl font-bold flex items-center justify-center gap-2 bg-primary-600 hover:bg-primary-500 disabled:opacity-50"
+            className="w-full py-3.5 rounded-2xl font-bold flex items-center justify-center gap-2 bg-primary-500 hover:bg-primary-600 text-white disabled:opacity-50 shadow-lg"
           >
             {sentSuccess ? (
               <>

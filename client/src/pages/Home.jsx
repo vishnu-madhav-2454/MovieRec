@@ -45,18 +45,25 @@ function Home() {
   return (
     <div className="animate-fade-in pb-20">
       <section className="relative -mt-16 min-h-[85vh] flex items-center justify-center overflow-hidden">
-        <div className="absolute inset-0 bg-gradient-to-b from-primary-950/30 via-dark-950/90 to-dark-950 z-10" />
-        <div className="absolute inset-0 bg-[radial-gradient(#ef4444_1px,transparent_1px)] [background-size:24px_24px] opacity-10" />
+        {trending[0]?.backdrop_path && (
+          <img
+            src={`https://image.tmdb.org/t/p/original${trending[0].backdrop_path}`}
+            alt=""
+            className="absolute inset-0 w-full h-full object-cover opacity-35"
+          />
+        )}
+        <div className="absolute inset-0 bg-gradient-to-b from-[#f5f1eb]/20 via-[#f5f1eb]/75 to-[#f5f1eb] z-10" />
+        <div className="absolute inset-0 bg-[radial-gradient(#e9674f_1px,transparent_1px)] [background-size:24px_24px] opacity-10" />
 
         <div className="relative z-20 text-center px-4 max-w-5xl mx-auto pt-16">
-          <div className="inline-flex items-center gap-2 px-4 py-1.5 rounded-full bg-primary-950/60 border border-primary-800/80 text-primary-400 text-xs font-bold uppercase tracking-wider mb-6 backdrop-blur-md">
-            Track films. Share reviews. Send memes.
+          <div className="inline-flex items-center gap-2 px-4 py-1.5 rounded-full bg-dark-900 border border-primary-200 text-primary-700 text-xs font-bold uppercase tracking-wider mb-6">
+            The social home for film people
           </div>
-          <h1 className="text-5xl sm:text-7xl font-black mb-6 tracking-tight">
-            Track. Review.
+          <h1 className="text-5xl sm:text-7xl font-black mb-6 tracking-tight text-dark-100">
+            Watch deeply.
             <br />
-            <span className="bg-gradient-to-r from-primary-400 via-rose-300 to-amber-300 bg-clip-text text-transparent">
-              Discourse & Memes.
+            <span className="text-primary-500">
+              Talk freely.
             </span>
           </h1>
           <p className="text-lg text-dark-300 mb-10 max-w-2xl mx-auto leading-relaxed">
@@ -66,7 +73,7 @@ function Home() {
             <button
               type="button"
               onClick={openAuthModal}
-              className="px-8 py-4 bg-gradient-to-r from-primary-600 to-primary-500 hover:from-primary-500 hover:to-primary-400 text-white font-bold rounded-2xl shadow-xl flex items-center gap-2"
+              className="px-8 py-4 bg-primary-500 hover:bg-primary-600 text-white font-bold rounded-2xl shadow-xl flex items-center gap-2"
             >
               Join the community <FiArrowRight className="w-5 h-5" />
             </button>

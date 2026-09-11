@@ -43,6 +43,7 @@ desktop.ini
 
 # Database
 *.sql
+!database/supabase-schema.sql
 *.db
 *.sqlite
 *.sqlite3

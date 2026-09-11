@@ -63,10 +63,12 @@ class ReviewController {
    */
   static async createReview(req, res) {
     try {
-      const { user_id, username, user_avatar, movie_id, movie_title, movie_poster, rating, content, vibes, has_spoilers } = req.body;
+      const { movieId } = req.params;
+      const { user_id, username, user_avatar, movie_title, movie_poster, rating, content, vibes, has_spoilers } = req.body;
+      const movie_id = Number(movieId);
 
       // Validation
-      if (!user_id || !movie_id || rating === undefined) {
+      if (!user_id || !Number.isInteger(movie_id) || movie_id <= 0 || rating === undefined) {
         return res.status(400).json({ 
           error: 'User ID, movie ID, and rating are required' 
         });

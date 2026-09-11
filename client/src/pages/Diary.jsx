@@ -61,7 +61,7 @@ export default function Diary() {
   }
 
   return (
-    <div className="min-h-screen bg-black md:ml-16 lg:ml-64 pb-20 md:pb-4">
+    <div className="min-h-screen bg-dark-950 pb-20 md:pb-4">
       <div className="max-w-4xl mx-auto px-4 py-6">
         {/* Header */}
         <div className="mb-6">

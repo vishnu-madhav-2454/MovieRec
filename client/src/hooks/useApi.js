@@ -2,7 +2,7 @@ import { useState, useEffect, useCallback } from 'react';
 import axios from 'axios';
 import { auth, isFirebaseConfigured } from '../config/firebase';
 
-const API_BASE = 'http://localhost:3001/api';
+const API_BASE = import.meta.env.VITE_API_URL || 'http://localhost:3001/api';
 
 // Get Firebase ID token for authenticated requests
 const getAuthToken = async () => {
@@ -114,8 +114,8 @@ export const apiHelpers = {
   
   // Review operations
   getReviews: (movieId) => api.get(`/reviews/movie/${movieId}`),
-  createReview: (movieId, rating, content) => 
-    api.post('/reviews', { movie_id: movieId, rating, content }),
+  createReview: (movieId, data) =>
+    api.post(`/reviews/movie/${movieId}`, data),
   updateReview: (reviewId, rating, content) => 
     api.put(`/reviews/${reviewId}`, { rating, content }),
   deleteReview: (reviewId) => api.delete(`/reviews/${reviewId}`),

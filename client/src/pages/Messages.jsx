@@ -164,15 +164,18 @@ export default function Messages() {
   }
 
   return (
-    <div className="min-h-screen bg-black md:ml-16 lg:ml-64">
-      <div className="max-w-4xl mx-auto h-[calc(100vh-3.5rem)] md:h-screen flex">
+    <div className="min-h-screen bg-dark-950 p-3 sm:p-5 md:p-7 pb-20 md:pb-7">
+      <div className="max-w-6xl mx-auto h-[calc(100vh-5rem)] min-h-[620px] md:h-[calc(100vh-3.5rem)] flex bg-dark-900 border border-dark-800 rounded-3xl overflow-hidden shadow-[0_18px_50px_rgba(67,55,43,0.08)]">
         {/* Conversations List */}
-        <div className={`w-full md:w-80 border-r border-dark-800 flex flex-col ${selectedUser ? "hidden md:flex" : "flex"}`}>
+        <div className={`w-full md:w-[340px] border-r border-dark-800 flex flex-col bg-dark-900 ${selectedUser ? "hidden md:flex" : "flex"}`}>
           {/* Header */}
-          <div className="p-4 border-b border-dark-800">
+          <div className="p-5 border-b border-dark-800 bg-dark-900">
             <div className="flex items-center justify-between mb-4">
-              <h1 className="text-lg font-bold">{currentUser?.displayName || "Messages"}</h1>
-              <button className="p-2 hover:bg-dark-800 rounded-lg transition-colors">
+              <div>
+                <p className="font-mono text-[10px] uppercase tracking-[0.2em] text-primary-600 mb-1">Private room</p>
+                <h1 className="text-xl font-extrabold tracking-tight">Messages</h1>
+              </div>
+              <button className="p-2.5 bg-primary-50 text-primary-600 hover:bg-primary-100 rounded-xl transition-colors" title="Start a conversation">
                 <FiEdit className="w-5 h-5" />
               </button>
             </div>
@@ -185,12 +188,12 @@ export default function Messages() {
                 placeholder="Search users..."
                 value={searchQuery}
                 onChange={(e) => setSearchQuery(e.target.value)}
-                className="w-full bg-dark-900 border border-dark-800 rounded-lg py-2 pl-10 pr-4 text-sm text-white placeholder-dark-500 focus:outline-none focus:border-dark-600"
+                className="w-full bg-dark-950 border border-dark-800 rounded-2xl py-3 pl-10 pr-4 text-sm text-white placeholder-dark-500 focus:outline-none focus:border-primary-400"
               />
               
               {/* Search Results Dropdown */}
               {searchResults.length > 0 && (
-                <div className="absolute top-full left-0 right-0 mt-2 bg-dark-900 border border-dark-800 rounded-lg overflow-hidden z-10 shadow-2xl">
+                <div className="absolute top-full left-0 right-0 mt-2 bg-dark-900 border border-dark-800 rounded-2xl overflow-hidden z-10 shadow-2xl">
                   {searchResults.map((user) => (
                     <button
                       key={user.id}
@@ -224,8 +227,8 @@ export default function Messages() {
                 <button
                   key={conv.user_id}
                   onClick={() => startConversation(conv)}
-                  className={`w-full flex items-center gap-3 p-4 hover:bg-dark-900 transition-colors border-b border-dark-900 ${
-                    selectedUser?.id === conv.user_id ? "bg-dark-900" : ""
+                    className={`w-full flex items-center gap-3 p-4 hover:bg-dark-950 transition-colors border-b border-dark-800 ${
+                    selectedUser?.id === conv.user_id ? "bg-primary-50" : ""
                   }`}
                 >
                   <div className="relative shrink-0">
@@ -233,7 +236,7 @@ export default function Messages() {
                       {conv.avatar_url ? <img src={conv.avatar_url} alt="" className="w-full h-full object-cover" /> : conv.username?.charAt(0).toUpperCase()}
                     </div>
                     {conv.unread_count > 0 && (
-                      <span className="absolute -top-0.5 -right-0.5 w-4 h-4 bg-primary-500 rounded-full text-[10px] font-bold flex items-center justify-center">
+                      <span className="absolute -top-0.5 -right-0.5 w-4 h-4 bg-primary-500 text-white rounded-full text-[10px] font-bold flex items-center justify-center">
                         {conv.unread_count}
                       </span>
                     )}
@@ -258,7 +261,7 @@ export default function Messages() {
           {selectedUser ? (
             <>
               {/* Chat Header */}
-              <div className="p-4 border-b border-dark-800 flex items-center gap-3 bg-black/40 backdrop-blur-sm">
+              <div className="p-4 sm:p-5 border-b border-dark-800 flex items-center gap-3 bg-dark-900">
                 <button
                   onClick={() => {
                     setSelectedUser(null);
@@ -286,14 +289,14 @@ export default function Messages() {
                 </Link>
                 <Link
                   to={`/profile/${selectedUser.id}`}
-                  className="px-3 py-1.5 rounded-lg text-xs font-semibold bg-dark-800 hover:bg-dark-700 text-dark-300 hover:text-white transition-colors"
+                    className="px-3 py-2 rounded-xl text-xs font-bold bg-dark-800 hover:bg-dark-700 text-dark-300 hover:text-white transition-colors"
                 >
                   Profile
                 </Link>
               </div>
 
               {/* Messages Scroll Area */}
-              <div className="flex-1 overflow-y-auto p-4 space-y-3">
+              <div className="flex-1 overflow-y-auto p-4 sm:p-6 space-y-3 bg-dark-950">
                 {messages.length === 0 ? (
                   <div className="flex flex-col items-center justify-center h-full text-center">
                     <FiUser className="w-12 h-12 text-dark-600 mb-3" />
@@ -419,12 +422,12 @@ export default function Messages() {
               </div>
 
               {/* Message Input */}
-              <form onSubmit={sendMessage} className="p-4 border-t border-dark-800 bg-black/40">
+              <form onSubmit={sendMessage} className="p-4 border-t border-dark-800 bg-dark-900">
                 <div className="flex items-center gap-2">
                   <button 
                     type="button" 
                     onClick={() => navigate("/memes")}
-                    className="p-2 text-dark-400 hover:text-white rounded-lg hover:bg-dark-800 transition-colors"
+                    className="p-2.5 text-dark-400 hover:text-primary-600 rounded-xl hover:bg-primary-50 transition-colors"
                     title="Send a Meme"
                   >
                     <FiFilm className="w-5 h-5 text-primary-400" />
@@ -434,7 +437,7 @@ export default function Messages() {
                     value={messageInput}
                     onChange={(e) => setMessageInput(e.target.value)}
                     placeholder="Message..."
-                    className="flex-1 bg-dark-900 border border-dark-800 rounded-full py-2.5 px-4 text-sm text-white placeholder-dark-500 focus:outline-none focus:border-primary-500 transition-colors"
+                    className="flex-1 bg-dark-950 border border-dark-800 rounded-2xl py-3 px-4 text-sm text-white placeholder-dark-500 focus:outline-none focus:border-primary-500 transition-colors"
                   />
                   <button
                     type="submit"
@@ -448,16 +451,17 @@ export default function Messages() {
             </>
           ) : (
             <div className="flex-1 flex flex-col items-center justify-center text-center p-6">
-              <div className="w-24 h-24 rounded-full bg-dark-900 flex items-center justify-center mb-4 border border-dark-800 shadow-xl">
+              <div className="w-24 h-24 rounded-3xl bg-primary-50 flex items-center justify-center mb-5 border border-primary-100 shadow-sm rotate-3">
                 <FiSend className="w-10 h-10 text-primary-500" />
               </div>
-              <h2 className="text-xl font-bold mb-2">Your Messages</h2>
+              <p className="font-mono text-[10px] uppercase tracking-[0.2em] text-primary-600 mb-2">Make a connection</p>
+              <h2 className="text-2xl font-extrabold mb-2 tracking-tight">Your messages</h2>
               <p className="text-dark-400 text-sm mb-6 max-w-xs">
                 Send private messages to friends, share memes, and discuss movies and reviews
               </p>
               <button
                 onClick={() => document.querySelector('input[placeholder="Search users..."]')?.focus()}
-                className="bg-primary-600 hover:bg-primary-500 text-white font-bold px-6 py-2.5 rounded-xl transition-all shadow-lg"
+                className="bg-primary-500 hover:bg-primary-600 text-white font-bold px-6 py-3 rounded-2xl transition-all shadow-lg"
               >
                 Start a Conversation
               </button>

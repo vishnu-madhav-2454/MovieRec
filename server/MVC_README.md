@@ -263,7 +263,6 @@ test('MovieController.getTrending returns 200', async () => {
 ## Performance Considerations
 
 - Models can implement caching
-- Controllers can add rate limiting
 - Routes can implement middleware
 - Use pagination for large datasets
 

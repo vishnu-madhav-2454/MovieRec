@@ -1,4 +1,5 @@
 import { BrowserRouter as Router, Routes, Route, Navigate, useLocation } from 'react-router-dom';
+import { useState } from 'react';
 import { AuthProvider, useAuth } from './context/AuthContext';
 import Navbar from './components/Navbar';
 import BottomNav from './components/BottomNav';
@@ -21,18 +22,23 @@ function AppContent() {
   const { currentUser } = useAuth();
   const isAuthenticated = currentUser && !currentUser.isGuest;
   const location = useLocation();
+  const hasSidebar = isAuthenticated && location.pathname !== '/memes';
+  const [sidebarOpen, setSidebarOpen] = useState(() => localStorage.getItem('movierec_sidebar') !== 'collapsed');
 
-  // Pages that show bottom nav — exclude /memes (full-screen Reels view)
-  const showBottomNav = isAuthenticated && location.pathname !== '/memes' && ['/', '/feed', '/messages', '/profile', '/search'].some(p => 
-    location.pathname === p || location.pathname.startsWith('/profile/') || location.pathname.startsWith('/messages')
-  );
+  const handleSidebarChange = (open) => {
+    setSidebarOpen(open);
+    localStorage.setItem('movierec_sidebar', open ? 'open' : 'collapsed');
+  };
+
+  // Keep the memes view full-screen; other authenticated pages use the sidebar.
+  const showBottomNav = hasSidebar;
 
   return (
     <div className="min-h-screen bg-black text-white selection:bg-primary-500 selection:text-white">
       {/* Show navbar only for guests, authenticated users get bottom nav */}
       {!isAuthenticated && <Navbar />}
       <AuthModal />
-      <main className={!isAuthenticated ? 'pt-16' : ''}>
+      <main className={hasSidebar ? `transition-[margin] duration-200 ${sidebarOpen ? 'md:ml-64' : 'md:ml-20'}` : (!isAuthenticated ? 'pt-16' : '')}>
         <Routes>
           {/* Public route - Only discover/home before login */}
           <Route path="/" element={isAuthenticated ? <Navigate to="/feed" replace /> : <Home />} />
@@ -56,7 +62,7 @@ function AppContent() {
           <Route path="/search" element={isAuthenticated ? <Search /> : <Navigate to="/" replace />} />
         </Routes>
       </main>
-      {showBottomNav && <BottomNav />}
+      {showBottomNav && <BottomNav sidebarOpen={sidebarOpen} onSidebarChange={handleSidebarChange} />}
     </div>
   );
 }

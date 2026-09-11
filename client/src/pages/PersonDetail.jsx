@@ -109,7 +109,7 @@ function PersonDetail() {
   return (
     <div className="min-h-screen px-4 sm:px-6 lg:px-8 max-w-7xl mx-auto py-10 animate-fade-in text-white">
       {/* Header Profile Section */}
-      <div className="grid md:grid-cols-[280px_1fr] gap-8 lg:gap-12 mb-12">
+      <div className="grid md:grid-cols-[280px_minmax(0,1fr)] gap-8 lg:gap-12 mb-12">
         {/* Left Column: Photo & Action Button */}
         <div>
           <div className="relative rounded-2xl overflow-hidden shadow-2xl border border-dark-700 bg-dark-900 aspect-[3/4]">

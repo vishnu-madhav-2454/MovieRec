@@ -8,8 +8,6 @@ export default function MemeUpload({ isOpen, onClose, currentUser, onUploaded })
   const [caption, setCaption] = useState('');
   const [movieId, setMovieId] = useState('');
   const [movieTitle, setMovieTitle] = useState('');
-  const [vibeInput, setVibeInput] = useState('');
-  const [vibes, setVibes] = useState(['CinemaHumor', 'Relatable']);
   const [searchQuery, setSearchQuery] = useState('');
   const [searchResults, setSearchResults] = useState([]);
   const [submitting, setSubmitting] = useState(false);
@@ -64,17 +62,6 @@ export default function MemeUpload({ isOpen, onClose, currentUser, onUploaded })
     setSearchQuery('');
   };
 
-  const handleAddVibe = (e) => {
-    if (e.key === 'Enter' || e.key === ',') {
-      e.preventDefault();
-      const val = vibeInput.trim().replace(/^#/, '');
-      if (val && !vibes.includes(val)) {
-        setVibes((prev) => [...prev, val]);
-        setVibeInput('');
-      }
-    }
-  };
-
   const handleSubmit = async (e) => {
     e.preventDefault();
     if (!imageFile) {
@@ -106,7 +93,6 @@ export default function MemeUpload({ isOpen, onClose, currentUser, onUploaded })
         movie_title: movieTitle || null,
         image_url: base64Image,
         caption,
-        vibes
       });
 
       if (onUploaded) onUploaded(res.data);
@@ -117,7 +103,6 @@ export default function MemeUpload({ isOpen, onClose, currentUser, onUploaded })
       setCaption('');
       setMovieId('');
       setMovieTitle('');
-      setVibes(['CinemaHumor', 'Relatable']);
       
       onClose();
     } catch (err) {
@@ -138,7 +123,7 @@ export default function MemeUpload({ isOpen, onClose, currentUser, onUploaded })
         <h2 className="text-2xl font-bold text-white flex items-center gap-2 mb-1">
           <FiUploadCloud className="text-primary-500" /> Post a cinema meme
         </h2>
-        <p className="text-xs text-dark-400 mb-6">Upload an image, add caption and tags</p>
+        <p className="text-xs text-dark-400 mb-6">Upload a moment from your movie life and share it with your circle.</p>
 
         <form onSubmit={handleSubmit} className="space-y-4">
           {/* Image Upload */}
@@ -249,29 +234,6 @@ export default function MemeUpload({ isOpen, onClose, currentUser, onUploaded })
                 )}
               </div>
             )}
-          </div>
-
-          {/* Vibes/Tags */}
-          <div>
-            <label className="block text-xs font-semibold text-dark-300 uppercase tracking-wider mb-1">Tags</label>
-            <div className="flex flex-wrap gap-1.5 mb-2">
-              {vibes.map((v) => (
-                <span key={v} className="inline-flex items-center gap-1 text-xs bg-dark-800 text-dark-200 px-2.5 py-1 rounded-full border border-dark-700">
-                  #{v}
-                  <button type="button" onClick={() => setVibes(vibes.filter((x) => x !== v))} className="hover:text-white">
-                    ×
-                  </button>
-                </span>
-              ))}
-            </div>
-            <input
-              type="text"
-              value={vibeInput}
-              onChange={(e) => setVibeInput(e.target.value)}
-              onKeyDown={handleAddVibe}
-              placeholder="Type a tag and press Enter"
-              className="w-full bg-dark-950 border border-dark-800 rounded-xl p-2.5 text-xs text-white placeholder-dark-500 focus:outline-none focus:border-primary-500"
-            />
           </div>
 
           {/* Submit Button */}

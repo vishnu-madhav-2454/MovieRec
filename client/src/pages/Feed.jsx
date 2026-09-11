@@ -13,11 +13,10 @@ import {
   FiEyeOff
 } from 'react-icons/fi';
 
-const TRENDING_TOPICS = [
-  { tag: 'DunePartTwo', posts: '14.2K' },
-  { tag: 'Oppenheimer70mm', posts: '9.8K' },
-  { tag: 'Interstellar10thAnniversary', posts: '8.4K' },
-  { tag: 'TheBatmanPartII', posts: '6.1K' }
+const CURRENTLY_PLAYING = [
+  { title: 'Dune: Part Two', meta: 'Epic sci-fi · 2024', tone: 'bg-amber-100 text-amber-800' },
+  { title: 'Oppenheimer', meta: 'Historical drama · 2023', tone: 'bg-sky-100 text-sky-800' },
+  { title: 'Interstellar', meta: 'Space odyssey · 2014', tone: 'bg-indigo-100 text-indigo-800' }
 ];
 
 const SUGGESTED_FILMMAKERS = [
@@ -171,28 +170,42 @@ export default function Feed() {
   if (loading) return <Loading />;
 
   return (
-    <div className="max-w-6xl mx-auto px-4 py-6">
-      <div className="grid grid-cols-1 lg:grid-cols-[1fr_320px] gap-8">
+    <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-10 py-8">
+      <div className="grid grid-cols-1 lg:grid-cols-[minmax(0,1fr)_320px] gap-8">
         <div className="space-y-4 max-w-2xl w-full mx-auto">
-          <div className="flex border-b border-dark-800 text-sm font-medium">
+          <div className="flex items-center justify-between mb-2">
+            <div>
+              <p className="font-mono text-[10px] uppercase tracking-[0.22em] text-primary-600 mb-1">The conversation</p>
+              <h1 className="text-2xl sm:text-3xl font-extrabold tracking-tight">Your film circle</h1>
+            </div>
+            <span className="hidden sm:inline-flex items-center gap-2 text-[11px] text-dark-500 bg-dark-900 border border-dark-800 px-3 py-2 rounded-full">
+              <span className="w-1.5 h-1.5 rounded-full bg-emerald-500" /> Live community
+            </span>
+          </div>
+          <div className="flex bg-dark-900 border border-dark-800 rounded-2xl p-1 text-sm font-bold shadow-sm">
             <button
               onClick={() => setFilter('all')}
-              className={`flex-1 pb-3 text-center transition-colors relative ${filter === 'all' ? 'text-white font-bold' : 'text-dark-400 hover:text-dark-200'}`}
+              className={`flex-1 py-2.5 text-center rounded-xl transition-colors relative ${filter === 'all' ? 'bg-dark-800 text-white shadow-sm' : 'text-dark-400 hover:text-dark-200'}`}
             >
               For You
-              {filter === 'all' && <div className="absolute bottom-0 left-1/4 right-1/4 h-0.5 bg-primary-500 rounded-full" />}
             </button>
             <button
               onClick={() => setFilter('following')}
-              className={`flex-1 pb-3 text-center transition-colors relative ${filter === 'following' ? 'text-white font-bold' : 'text-dark-400 hover:text-dark-200'}`}
+              className={`flex-1 py-2.5 text-center rounded-xl transition-colors relative ${filter === 'following' ? 'bg-dark-800 text-white shadow-sm' : 'text-dark-400 hover:text-dark-200'}`}
             >
               Following
-              {filter === 'following' && <div className="absolute bottom-0 left-1/4 right-1/4 h-0.5 bg-primary-500 rounded-full" />}
             </button>
           </div>
 
-          <div className="border-b border-dark-800 pb-5 pt-2">
+          <div className="bg-dark-900 border border-dark-800 rounded-3xl p-4 sm:p-5 shadow-[0_12px_35px_rgba(67,55,43,0.06)]">
             <form onSubmit={handlePost}>
+              <div className="flex items-center justify-between mb-4">
+                <div>
+                  <p className="text-sm font-extrabold">Start a conversation</p>
+                  <p className="text-[11px] text-dark-500 mt-0.5">Share a thought, rating, or the film on your mind.</p>
+                </div>
+                <span className="font-mono text-[10px] text-dark-500">PUBLIC NOTE</span>
+              </div>
               <div className="flex gap-3">
                 <div className="w-10 h-10 rounded-full bg-dark-800 border border-dark-700 flex items-center justify-center font-bold text-sm text-dark-200 shrink-0">
                   {currentUser?.displayName?.charAt(0).toUpperCase() || 'U'}
@@ -203,7 +216,7 @@ export default function Feed() {
                     value={content}
                     onChange={(e) => setContent(e.target.value)}
                     placeholder="What did you just watch? Share thoughts or hot takes..."
-                    className="w-full bg-transparent text-sm text-white placeholder-dark-500 focus:outline-none resize-none"
+                    className="w-full bg-transparent text-sm text-white placeholder-dark-500 focus:outline-none resize-none min-h-16"
                   />
                   {selectedMovie && (
                     <div className="inline-flex items-center gap-2 bg-dark-900 border border-dark-800 px-3 py-1 rounded-full text-xs text-white mb-2">
@@ -227,7 +240,7 @@ export default function Feed() {
                       ))}
                     </div>
                   )}
-                  <div className="flex items-center justify-between pt-3 border-t border-dark-900">
+                  <div className="flex items-center justify-between pt-3 mt-2 border-t border-dark-800">
                     <div className="flex items-center gap-3 text-dark-400 text-xs">
                       <input
                         type="text"
@@ -261,7 +274,7 @@ export default function Feed() {
                     <button
                       type="submit"
                       disabled={!content.trim() || submitting}
-                      className="bg-white text-black font-bold text-xs px-4 py-1.5 rounded-full hover:bg-dark-200 transition-colors disabled:opacity-40"
+                      className="bg-primary-500 text-white font-bold text-xs px-4 py-2 rounded-xl hover:bg-primary-600 transition-colors disabled:opacity-40 shadow-sm"
                     >
                       {submitting ? 'Posting...' : 'Post'}
                     </button>
@@ -279,7 +292,7 @@ export default function Feed() {
               const showComments = expandedComments[post.id];
 
               return (
-                <article key={post.id} className="py-4 hover:bg-dark-950/40 transition-colors">
+                <article key={post.id} className="bg-dark-900 border border-dark-800 rounded-3xl p-4 sm:p-5 hover:border-primary-200 transition-colors shadow-[0_8px_24px_rgba(67,55,43,0.04)]">
                   <div className="flex gap-3">
                     <Link
                       to={`/profile/${post.user_id}`}
@@ -421,22 +434,24 @@ export default function Feed() {
           </div>
         </div>
         <aside className="hidden lg:block space-y-6">
-          <div className="bg-dark-950 border border-dark-800 rounded-2xl p-4">
-            <h3 className="font-bold text-sm text-white mb-3">Trending in Cinema</h3>
+          <div className="bg-dark-900 border border-dark-800 rounded-3xl p-5 shadow-sm">
+            <p className="font-mono text-[10px] uppercase tracking-[0.2em] text-primary-600 mb-2">Pulse check</p>
+            <h3 className="font-extrabold text-lg text-white mb-4">Now showing in the circle</h3>
             <div className="space-y-3">
-              {TRENDING_TOPICS.map((t, idx) => (
-                <div key={idx} className="flex justify-between items-center text-xs group cursor-pointer">
-                  <div>
-                    <p className="font-semibold text-white group-hover:underline">#{t.tag}</p>
-                    <p className="text-dark-500 text-[11px]">{t.posts} posts</p>
+              {CURRENTLY_PLAYING.map((movie) => (
+                <div key={movie.title} className="flex items-center gap-3 text-xs group cursor-pointer">
+                  <div className={`w-9 h-9 rounded-xl ${movie.tone} flex items-center justify-center font-black text-sm`}>{movie.title.charAt(0)}</div>
+                  <div className="min-w-0">
+                    <p className="font-semibold text-white group-hover:underline truncate">{movie.title}</p>
+                    <p className="text-dark-500 text-[11px]">{movie.meta}</p>
                   </div>
-                  <span className="text-dark-600 text-[11px]">Trending</span>
                 </div>
               ))}
             </div>
           </div>
-          <div className="bg-dark-950 border border-dark-800 rounded-2xl p-4">
-            <h3 className="font-bold text-sm text-white mb-3">Filmmakers to Follow</h3>
+          <div className="bg-dark-900 border border-dark-800 rounded-3xl p-5 shadow-sm">
+            <p className="font-mono text-[10px] uppercase tracking-[0.2em] text-primary-600 mb-2">Curated for you</p>
+            <h3 className="font-extrabold text-lg text-white mb-4">Filmmakers to follow</h3>
             <div className="space-y-3">
               {SUGGESTED_FILMMAKERS.map((f) => {
                 const isFollowed = followedMap[f.id];

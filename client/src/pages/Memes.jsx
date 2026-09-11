@@ -323,11 +323,6 @@ function ReelCard({ meme, heartBurst, onDoubleTap, onLike, onComment, onShare, o
           {meme.movie_title && <span className="text-xs text-white/80 flex items-center gap-1 font-semibold"><FiFilm className="w-3 h-3 text-amber-400" /> {meme.movie_title}</span>}
         </div>
         {meme.caption && <p className="text-sm text-white/90 leading-snug drop-shadow-md line-clamp-2 max-w-xs">{meme.caption}</p>}
-        {meme.vibes?.length > 0 && (
-          <div className="flex gap-2 mt-1.5 flex-wrap">
-            {meme.vibes.slice(0, 3).map(v => <span key={v} className="text-[11px] text-white/70 font-medium">#{v}</span>)}
-          </div>
-        )}
       </div>
     </div>
   );

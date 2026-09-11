@@ -206,7 +206,6 @@ MovieRec/
 ## 🔐 Security Features
 
 - Firebase Authentication
-- Rate limiting on API endpoints
 - Input validation and sanitization
 - SQL injection prevention
 - XSS protection

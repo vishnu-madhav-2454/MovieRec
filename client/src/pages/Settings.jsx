@@ -2,7 +2,7 @@ import { useState } from 'react';
 import { useNavigate } from 'react-router-dom';
 import { useAuth } from '../context/AuthContext';
 import { FiArrowLeft, FiUser, FiMail, FiLock, FiTrash2, FiSave } from 'react-icons/fi';
-import axios from 'axios';
+import { api } from '../hooks/useApi';
 
 function Settings() {
   const navigate = useNavigate();
@@ -16,7 +16,7 @@ function Settings() {
     e.preventDefault();
     setSaving(true);
     try {
-      await axios.put('/api/users/' + currentUser.id, {
+      await api.put('/users/me', {
         username,
         bio,
         email
