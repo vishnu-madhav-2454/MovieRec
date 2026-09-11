@@ -282,7 +282,12 @@ function Profile() {
           {/* Watched Films Section */}
           <div className="flex items-center justify-between mb-4">
             <h3 className="text-lg font-bold text-white">Films Watched</h3>
-            <span className="text-xs text-dark-400">{stats.watched || watchedFilms.length} films logged</span>
+            <div className="flex items-center gap-3">
+              <Link to={`/profile/${id}/diary`} className="text-xs font-semibold text-primary-400 hover:text-primary-300">
+                Open diary
+              </Link>
+              <span className="text-xs text-dark-400">{stats.watched || watchedFilms.length} films logged</span>
+            </div>
           </div>
 
           {watchedFilms.length === 0 ? (

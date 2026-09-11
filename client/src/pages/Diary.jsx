@@ -21,8 +21,8 @@ export default function Diary() {
 
   const loadDiary = async () => {
     try {
-      // Get user's reviews as diary entries
-      const res = await axios.get(`/api/reviews/user/${id}`);
+      // Diary entries are watched films; reviews are optional details on an entry.
+      const res = await axios.get(`/api/users/${id}/watched`);
       const entries = res.data || [];
       setDiaryEntries(entries);
 
@@ -43,14 +43,14 @@ export default function Diary() {
 
   // Group entries by date
   const groupedEntries = diaryEntries.reduce((groups, entry) => {
-    const date = new Date(entry.created_at);
+    const date = new Date(entry.watched_at || entry.created_at);
     const key = `${date.getFullYear()}-${String(date.getMonth() + 1).padStart(2, '0')}`;
     if (!groups[key]) groups[key] = [];
     groups[key].push(entry);
     return groups;
   }, {});
 
-  const years = [...new Set(diaryEntries.map(e => new Date(e.created_at).getFullYear()))];
+  const years = [...new Set(diaryEntries.map(e => new Date(e.watched_at || e.created_at).getFullYear()))];
 
   if (loading) {
     return (
@@ -190,7 +190,7 @@ export default function Diary() {
                           <div className="flex-1 min-w-0">
                             <p className="font-semibold text-white truncate">{entry.movie_title}</p>
                             <p className="text-dark-400 text-xs">
-                              {new Date(entry.created_at).toLocaleDateString()}
+                              {new Date(entry.watched_at || entry.created_at).toLocaleDateString()}
                             </p>
                           </div>
                           {entry.rating && (

@@ -30,6 +30,8 @@ function MovieDetail() {
   const [loading, setLoading] = useState(true);
   const [loadError, setLoadError] = useState(false);
   const [inWatchlist, setInWatchlist] = useState(false);
+  const [inDiary, setInDiary] = useState(false);
+  const [savingDiary, setSavingDiary] = useState(false);
   const [reviewSort, setReviewSort] = useState('popular');
   const [userRating, setUserRating] = useState(0);
   const [reviewContent, setReviewContent] = useState('');
@@ -44,16 +46,18 @@ function MovieDetail() {
         setLoading(true);
         setLoadError(false);
         const uid = currentUser?.id || 1;
-        const [movieRes, recRes, watchRes, reviewsRes, statsRes] = await Promise.all([
+        const [movieRes, recRes, watchRes, diaryRes, reviewsRes, statsRes] = await Promise.all([
           axios.get('/api/movies/' + id),
           axios.get('/api/movies/' + id + '/recommendations').catch(() => ({ data: { results: [] } })),
           axios.get('/api/watchlist/check/' + uid + '/' + id).catch(() => ({ data: { inWatchlist: false } })),
+          axios.get('/api/users/' + uid + '/watched').catch(() => ({ data: [] })),
           axios.get('/api/reviews/movie/' + id + '?sort=' + reviewSort + '&userId=' + uid).catch(() => ({ data: [] })),
           axios.get('/api/reviews/movie/' + id + '/stats').catch(() => ({ data: {} }))
         ]);
         setMovie(movieRes.data);
         setRecommendations(recRes.data.results?.slice(0, 6) || []);
         setInWatchlist(!!(watchRes.data?.inWatchlist || watchRes.data?.inWatchlist));
+        setInDiary((diaryRes.data || []).some((entry) => String(entry.movie_id) === String(id)));
         setCommunityReviews(reviewsRes.data || []);
         const stats = statsRes.data || {};
         setCommunityStats({
@@ -89,6 +93,32 @@ function MovieDetail() {
       }
     } catch (error) {
       console.error(error);
+    }
+  };
+
+  const toggleDiary = async () => {
+    if (currentUser?.isGuest) return openAuthModal();
+    const uid = currentUser?.id || 1;
+    setSavingDiary(true);
+    try {
+      if (inDiary) {
+        await axios.delete('/api/users/' + uid + '/watched/' + id);
+        setInDiary(false);
+      } else {
+        await axios.post('/api/users/' + uid + '/watched', {
+          movie: {
+            id: movie.id,
+            title: movie.title,
+            poster_path: movie.poster_path,
+            watched_at: new Date().toISOString()
+          }
+        });
+        setInDiary(true);
+      }
+    } catch (error) {
+      console.error(error);
+    } finally {
+      setSavingDiary(false);
     }
   };
 
@@ -190,6 +220,18 @@ function MovieDetail() {
               >
                 {inWatchlist ? <FiCheck /> : <FiBookmark />}
                 {inWatchlist ? 'In watchlist' : 'Add to watchlist'}
+              </button>
+              <button
+                type="button"
+                onClick={toggleDiary}
+                disabled={savingDiary}
+                className={
+                  'w-full flex items-center justify-center gap-2 py-3.5 rounded-xl font-semibold ' +
+                  (inDiary ? 'bg-emerald-600 text-white' : 'bg-dark-900 border border-dark-700')
+                }
+              >
+                {inDiary ? <FiCheck /> : <FiFilm />}
+                {savingDiary ? 'Saving...' : inDiary ? 'In diary' : 'Log to diary'}
               </button>
               <button
                 type="button"
