@@ -107,7 +107,7 @@ export default function MemeUpload({ isOpen, onClose, currentUser, onUploaded })
       onClose();
     } catch (err) {
       console.error('Failed to create meme:', err);
-      alert('Failed to upload meme. Please try again.');
+      alert(err.response?.data?.error || 'Failed to upload meme. Please try again.');
     } finally {
       setSubmitting(false);
       setUploading(false);
