@@ -73,19 +73,29 @@ class MemeModel {
    * Toggle like on a meme
    */
   static async toggleLike(memeId, userId) {
-    const existing = await pool.query(
-      'SELECT * FROM meme_likes WHERE meme_id = $1 AND user_id = $2',
-      [memeId, userId]
-    );
-
-    if (existing.rows.length > 0) {
-      await pool.query('DELETE FROM meme_likes WHERE meme_id = $1 AND user_id = $2', [memeId, userId]);
-      await pool.query('UPDATE memes SET likes_count = GREATEST(0, likes_count - 1) WHERE id = $1', [memeId]);
-      return { isLiked: false };
-    } else {
-      await pool.query('INSERT INTO meme_likes (meme_id, user_id) VALUES ($1, $2)', [memeId, userId]);
-      await pool.query('UPDATE memes SET likes_count = likes_count + 1 WHERE id = $1', [memeId]);
-      return { isLiked: true };
+    const client = await pool.connect();
+    try {
+      await client.query('BEGIN');
+      const removed = await client.query(
+        'DELETE FROM meme_likes WHERE meme_id = $1 AND user_id = $2 RETURNING id',
+        [memeId, userId]
+      );
+      const isLiked = removed.rowCount === 0;
+      if (isLiked) {
+        await client.query(
+          'INSERT INTO meme_likes (meme_id, user_id) VALUES ($1, $2) ON CONFLICT (meme_id, user_id) DO NOTHING',
+          [memeId, userId]
+        );
+      }
+      const count = await client.query('SELECT COUNT(*)::int AS likes_count FROM meme_likes WHERE meme_id = $1', [memeId]);
+      await client.query('UPDATE memes SET likes_count = $2 WHERE id = $1', [memeId, count.rows[0].likes_count]);
+      await client.query('COMMIT');
+      return { isLiked, likes_count: count.rows[0].likes_count };
+    } catch (error) {
+      await client.query('ROLLBACK');
+      throw error;
+    } finally {
+      client.release();
     }
   }
 

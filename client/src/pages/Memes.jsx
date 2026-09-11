@@ -20,6 +20,7 @@ export default function Memes() {
   const [commentsLoading, setCommentsLoading] = useState(false);
   const [toast, setToast] = useState("");
   const [heartBurst, setHeartBurst] = useState(null);
+  const [likePending, setLikePending] = useState({});
 
   const showToast = (msg) => { setToast(msg); setTimeout(() => setToast(""), 2000); };
 
@@ -35,12 +36,15 @@ export default function Memes() {
 
   const handleLike = async (memeId) => {
     if (currentUser?.isGuest) return openAuthModal();
-    setMemes(prev => prev.map(m => m.id === memeId ? { ...m, is_liked: !m.is_liked, likes_count: m.is_liked ? Math.max(0, (m.likes_count||1)-1) : (m.likes_count||0)+1 } : m));
+    if (likePending[memeId]) return;
+    setLikePending(prev => ({ ...prev, [memeId]: true }));
     try {
       const res = await axios.post(`/api/memes/${memeId}/like`, { userId: currentUser?.id || 1 });
-      setMemes(prev => prev.map(m => m.id === memeId ? { ...m, likes_count: res.data.likes_count, is_liked: res.data.isLiked } : m));
-    } catch { 
-      setMemes(prev => prev.map(m => m.id === memeId ? { ...m, is_liked: !m.is_liked, likes_count: m.is_liked ? Math.max(0,(m.likes_count||1)-1) : (m.likes_count||0)+1 } : m)); 
+      setMemes(prev => prev.map(m => m.id === memeId ? { ...m, likes_count: res.data.likes_count ?? m.likes_count, is_liked: res.data.isLiked } : m));
+    } catch (error) {
+      console.error('Failed to toggle meme like:', error);
+    } finally {
+      setLikePending(prev => ({ ...prev, [memeId]: false }));
     }
   };
 
@@ -144,6 +148,7 @@ export default function Memes() {
               key={meme.id} 
               meme={meme} 
               heartBurst={heartBurst}
+              likePending={likePending[meme.id]}
               onDoubleTap={handleDoubleTap} 
               onLike={handleLike}
               onComment={() => openComments(meme.id)} 
@@ -253,7 +258,7 @@ export default function Memes() {
   );
 }
 
-function ReelCard({ meme, heartBurst, onDoubleTap, onLike, onComment, onShare, onDm }) {
+function ReelCard({ meme, heartBurst, likePending, onDoubleTap, onLike, onComment, onShare, onDm }) {
   const lastTap = useRef(0);
   const handleTap = () => { 
     const now = Date.now(); 
@@ -279,7 +284,7 @@ function ReelCard({ meme, heartBurst, onDoubleTap, onLike, onComment, onShare, o
       {/* Right dock */}
       <div className="absolute right-3 bottom-24 flex flex-col items-center gap-5 z-20">
         {/* Like */}
-        <button type="button" onClick={() => onLike(meme.id)} className="flex flex-col items-center gap-0.5 active:scale-90 transition-transform">
+        <button type="button" disabled={likePending} onClick={() => onLike(meme.id)} className="flex flex-col items-center gap-0.5 active:scale-90 transition-transform disabled:opacity-60">
           <FiHeart className={`w-7 h-7 drop-shadow-lg transition-all duration-200 ${meme.is_liked ? "text-rose-500 fill-rose-500" : "text-white"}`}
             style={meme.is_liked ? { filter:"drop-shadow(0 0 8px rgba(244,63,94,0.8))", animation:"likeJump 0.3s ease" } : {}} />
           <span className="text-xs font-bold text-white drop-shadow">{meme.likes_count||0}</span>

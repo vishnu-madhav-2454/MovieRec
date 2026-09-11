@@ -302,27 +302,16 @@ class ListModel {
     try {
       await client.query('BEGIN');
 
-      // Check if already liked
-      const existingLike = await client.query(
-        'SELECT id FROM list_likes WHERE list_id = $1 AND user_id = $2',
+      const removed = await client.query(
+        'DELETE FROM list_likes WHERE list_id = $1 AND user_id = $2 RETURNING id',
         [listId, userId]
       );
-
-      let liked;
-      if (existingLike.rows.length > 0) {
-        // Unlike
+      const liked = removed.rowCount === 0;
+      if (liked) {
         await client.query(
-          'DELETE FROM list_likes WHERE list_id = $1 AND user_id = $2',
+          'INSERT INTO list_likes (list_id, user_id) VALUES ($1, $2) ON CONFLICT (list_id, user_id) DO NOTHING',
           [listId, userId]
         );
-        liked = false;
-      } else {
-        // Like
-        await client.query(
-          'INSERT INTO list_likes (list_id, user_id) VALUES ($1, $2)',
-          [listId, userId]
-        );
-        liked = true;
       }
 
       // Get new like count
