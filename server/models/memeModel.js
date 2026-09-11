@@ -46,13 +46,13 @@ class MemeModel {
    * Create a new meme
    */
   static async createMeme(memeData) {
-    const { user_id, image_url, image_public_id, caption, movie_id, movie_title, vibes } = memeData;
+    const { user_id, image_url, caption, movie_id, movie_title, vibes } = memeData;
     
     const result = await pool.query(`
-      INSERT INTO memes (user_id, image_url, image_public_id, caption, movie_id, movie_title, vibes, likes_count, comments_count, shares_count)
-      VALUES ($1, $2, $3, $4, $5, $6, $7, 0, 0, 0)
+      INSERT INTO memes (user_id, image_url, caption, movie_id, movie_title, vibes, likes_count, comments_count, shares_count)
+      VALUES ($1, $2, $3, $4, $5, $6, 0, 0, 0)
       RETURNING *
-    `, [user_id, image_url, image_public_id || null, caption || '', movie_id || null, movie_title || null, vibes || []]);
+    `, [user_id, image_url, caption || '', movie_id || null, movie_title || null, vibes || []]);
 
     // Get user info
     const userResult = await pool.query('SELECT username, avatar_url FROM users WHERE id = $1', [user_id]);
