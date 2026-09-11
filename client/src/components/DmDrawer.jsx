@@ -1,5 +1,7 @@
 import { useState, useEffect } from 'react';
 import axios from 'axios';
+import { io } from 'socket.io-client';
+import { auth } from '../config/firebase';
 import { FiX, FiSend, FiCheck, FiUsers, FiFilm } from 'react-icons/fi';
 
 export default function DmDrawer({ isOpen, onClose, currentUser, memeToSend, reviewToSend, onSent }) {
@@ -54,15 +56,27 @@ export default function DmDrawer({ isOpen, onClose, currentUser, memeToSend, rev
   const handleSend = async () => {
     if (!selectedUser) return;
     setSending(true);
+    let socket;
     try {
-      await axios.post('/api/dm/send', {
-        sender_id: currentUser?.id || 1,
-        sender_name: currentUser?.displayName || currentUser?.username || 'MovieBuff',
-        receiver_id: selectedUser.id,
-        content: messageText,
-        meme_id: memeToSend?.id || null,
-        review_id: reviewToSend?.id ? (reviewToSend.id >= 100000 ? reviewToSend.id - 100000 : reviewToSend.id) : null
+      const token = await auth?.currentUser?.getIdToken();
+      if (!token) throw new Error('Authentication token unavailable');
+
+      const apiUrl = import.meta.env.VITE_API_URL || 'http://localhost:3001/api';
+      socket = io(apiUrl.replace(/\/api\/?$/, ''), {
+        auth: { token },
+        transports: ['websocket', 'polling']
       });
+
+      const result = await new Promise((resolve, reject) => {
+        socket.on('connect', () => socket.emit('send_message', {
+          receiver_id: selectedUser.id,
+          content: messageText,
+          meme_id: memeToSend?.id || null,
+          review_id: reviewToSend?.id ? (reviewToSend.id >= 100000 ? reviewToSend.id - 100000 : reviewToSend.id) : null
+        }, resolve));
+        socket.on('connect_error', reject);
+      });
+      if (!result?.ok) throw new Error(result?.error || 'Failed to send message');
       setSentSuccess(true);
       setTimeout(() => {
         setSentSuccess(false);
@@ -72,6 +86,7 @@ export default function DmDrawer({ isOpen, onClose, currentUser, memeToSend, rev
     } catch (e) {
       console.error(e);
     } finally {
+      socket?.disconnect();
       setSending(false);
     }
   };
