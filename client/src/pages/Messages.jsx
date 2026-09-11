@@ -2,6 +2,8 @@
 import { useParams, useNavigate, Link } from "react-router-dom";
 import { useAuth } from "../context/AuthContext";
 import axios from "axios";
+import { io } from "socket.io-client";
+import { auth } from "../config/firebase";
 import {
   FiArrowLeft,
   FiSend,
@@ -33,23 +35,50 @@ export default function Messages() {
   const [selectedDetailMeme, setSelectedDetailMeme] = useState(null);
   const [selectedDetailReview, setSelectedDetailReview] = useState(null);
   const messagesEndRef = useRef(null);
+  const socketRef = useRef(null);
+  const activeChatRef = useRef(null);
 
   const isAuthed = currentUser && !currentUser.isGuest;
 
   useEffect(() => {
+    activeChatRef.current = chatUserId ? String(chatUserId) : null;
+  }, [chatUserId]);
+
+  useEffect(() => {
     if (!isAuthed) return;
     loadConversations();
-    const interval = setInterval(loadConversations, 4000);
-    return () => clearInterval(interval);
+
+    let socket;
+    let cancelled = false;
+    const connectSocket = async () => {
+      const token = await auth?.currentUser?.getIdToken();
+      if (!token || cancelled) return;
+
+      const apiUrl = import.meta.env.VITE_API_URL || 'http://localhost:3001/api';
+      const socketUrl = apiUrl.replace(/\/api\/?$/, '');
+      socket = io(socketUrl, { auth: { token }, transports: ['websocket', 'polling'] });
+      socketRef.current = socket;
+      socket.on('message:new', (message) => {
+        const otherUserId = String(message.sender_id === currentUser.id ? message.receiver_id : message.sender_id);
+        if (otherUserId === activeChatRef.current) {
+          setMessages((previous) => previous.some((item) => item.id === message.id) ? previous : [...previous, message]);
+        }
+        loadConversations();
+      });
+      socket.on('connect_error', (error) => console.error('Realtime messaging connection failed:', error.message));
+    };
+    connectSocket();
+
+    return () => {
+      cancelled = true;
+      socketRef.current?.disconnect();
+      socketRef.current = null;
+    };
   }, [isAuthed, currentUser]);
 
   useEffect(() => {
     if (chatUserId && isAuthed) {
       loadChat(chatUserId);
-      const chatInterval = setInterval(() => {
-        loadChatSilent(chatUserId);
-      }, 2500);
-      return () => clearInterval(chatInterval);
     }
   }, [chatUserId, isAuthed, currentUser]);
 
@@ -127,13 +156,17 @@ export default function Messages() {
     setMessageInput("");
 
     try {
-      const res = await axios.post("/api/dm/send", {
-        sender_id: currentUser?.id || 1,
-        receiver_id: selectedUser.id,
-        content: text
+      if (!socketRef.current?.connected) {
+        throw new Error('Realtime messaging is not connected');
+      }
+      const result = await new Promise((resolve) => {
+        socketRef.current.emit('send_message', {
+          receiver_id: selectedUser.id,
+          content: text
+        }, resolve);
       });
-
-      setMessages((prev) => [...prev, res.data]);
+      if (!result?.ok) throw new Error(result?.error || 'Failed to send message');
+      setMessages((prev) => prev.some((message) => message.id === result.message.id) ? prev : [...prev, result.message]);
       loadConversations();
     } catch (e) {
       console.error(e);
