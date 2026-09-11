@@ -46,6 +46,7 @@ export default function Feed() {
   const [expandedComments, setExpandedComments] = useState({});
   const [commentInputs, setCommentInputs] = useState({});
   const [followedMap, setFollowedMap] = useState({});
+  const [likePending, setLikePending] = useState({});
 
   useEffect(() => {
     async function load() {
@@ -115,6 +116,8 @@ export default function Feed() {
 
   const toggleLike = async (postId) => {
     if (currentUser?.isGuest) return openAuthModal();
+    if (likePending[postId]) return;
+    setLikePending(prev => ({ ...prev, [postId]: true }));
     try {
       const res = await axios.post(`/api/social/posts/${postId}/like`, {
         userId: currentUser?.id || 1
@@ -123,11 +126,10 @@ export default function Feed() {
         prev.map((p) => {
           if (p.id === postId) {
             const uId = currentUser?.id || 1;
-            const liked = p.liked_by?.includes(uId);
             return {
               ...p,
               likes_count: res.data.likes_count,
-              liked_by: liked ? p.liked_by.filter((id) => id !== uId) : [...(p.liked_by || []), uId]
+              is_liked: res.data.isLiked
             };
           }
           return p;
@@ -135,6 +137,8 @@ export default function Feed() {
       );
     } catch (e) {
       console.error(e);
+    } finally {
+      setLikePending(prev => ({ ...prev, [postId]: false }));
     }
   };
 
@@ -272,8 +276,7 @@ export default function Feed() {
           </div>
           <div className="divide-y divide-dark-800">
             {feed.map((post) => {
-              const uId = currentUser?.id || 1;
-              const isLiked = post.liked_by?.includes(uId);
+              const isLiked = post.is_liked;
               const isSpoiler = post.has_spoilers;
               const isRevealed = revealedSpoilers[post.id];
               const showComments = expandedComments[post.id];
@@ -360,6 +363,7 @@ export default function Feed() {
                       <div className="flex items-center gap-8 text-dark-400 text-xs pt-2">
                         <button
                           onClick={() => toggleLike(post.id)}
+                          disabled={likePending[post.id]}
                           className={`flex items-center gap-1.5 transition-colors ${isLiked ? 'text-rose-500' : 'hover:text-rose-400'}`}
                         >
                           <FiHeart className={`w-4 h-4 ${isLiked ? 'fill-rose-500' : ''}`} />

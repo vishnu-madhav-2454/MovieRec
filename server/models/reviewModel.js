@@ -225,27 +225,16 @@ class ReviewModel {
     try {
       await client.query('BEGIN');
       
-      // Check if already liked
-      const existingLike = await client.query(
-        'SELECT id FROM review_likes WHERE review_id = $1 AND user_id = $2',
+      const removed = await client.query(
+        'DELETE FROM review_likes WHERE review_id = $1 AND user_id = $2 RETURNING id',
         [reviewId, userId]
       );
-      
-      let isLiked;
-      if (existingLike.rows.length > 0) {
-        // Unlike
+      const isLiked = removed.rowCount === 0;
+      if (isLiked) {
         await client.query(
-          'DELETE FROM review_likes WHERE review_id = $1 AND user_id = $2',
+          'INSERT INTO review_likes (review_id, user_id) VALUES ($1, $2) ON CONFLICT (review_id, user_id) DO NOTHING',
           [reviewId, userId]
         );
-        isLiked = false;
-      } else {
-        // Like
-        await client.query(
-          'INSERT INTO review_likes (review_id, user_id) VALUES ($1, $2)',
-          [reviewId, userId]
-        );
-        isLiked = true;
       }
       
       // Update count

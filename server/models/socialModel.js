@@ -177,38 +177,29 @@ class SocialModel {
   static async toggleLike(postId, userId) {
     const idNum = parseInt(postId);
     const uId = parseInt(userId);
+    const client = await pool.connect();
 
-    // Handle review item from feed
-    if (idNum >= 100000) {
-      const reviewId = idNum - 100000;
-      const existing = await pool.query(
-        'SELECT id FROM review_likes WHERE review_id = $1 AND user_id = $2',
-        [reviewId, uId]
-      );
-      if (existing.rows.length > 0) {
-        await pool.query('DELETE FROM review_likes WHERE review_id = $1 AND user_id = $2', [reviewId, uId]);
-        const countRes = await pool.query('UPDATE reviews SET likes_count = GREATEST(0, likes_count - 1) WHERE id = $1 RETURNING likes_count', [reviewId]);
-        return { isLiked: false, likes_count: countRes.rows[0]?.likes_count || 0 };
-      } else {
-        await pool.query('INSERT INTO review_likes (review_id, user_id) VALUES ($1, $2)', [reviewId, uId]);
-        const countRes = await pool.query('UPDATE reviews SET likes_count = likes_count + 1 WHERE id = $1 RETURNING likes_count', [reviewId]);
-        return { isLiked: true, likes_count: countRes.rows[0]?.likes_count || 0 };
+    try {
+      await client.query('BEGIN');
+      const isReview = idNum >= 100000;
+      const itemId = isReview ? idNum - 100000 : idNum;
+      const table = isReview ? 'review_likes' : 'post_likes';
+      const key = isReview ? 'review_id' : 'post_id';
+      const removed = await client.query(`DELETE FROM ${table} WHERE ${key} = $1 AND user_id = $2 RETURNING id`, [itemId, uId]);
+      const isLiked = removed.rowCount === 0;
+      if (isLiked) {
+        await client.query(`INSERT INTO ${table} (${key}, user_id) VALUES ($1, $2) ON CONFLICT (${key}, user_id) DO NOTHING`, [itemId, uId]);
       }
-    }
-
-    const existing = await pool.query(
-      'SELECT * FROM post_likes WHERE post_id = $1 AND user_id = $2',
-      [idNum, uId]
-    );
-
-    if (existing.rows.length > 0) {
-      await pool.query('DELETE FROM post_likes WHERE post_id = $1 AND user_id = $2', [idNum, uId]);
-      const countRes = await pool.query('UPDATE social_posts SET likes_count = GREATEST(0, likes_count - 1) WHERE id = $1 RETURNING likes_count', [idNum]);
-      return { isLiked: false, likes_count: countRes.rows[0]?.likes_count || 0 };
-    } else {
-      await pool.query('INSERT INTO post_likes (post_id, user_id) VALUES ($1, $2)', [idNum, uId]);
-      const countRes = await pool.query('UPDATE social_posts SET likes_count = likes_count + 1 WHERE id = $1 RETURNING likes_count', [idNum]);
-      return { isLiked: true, likes_count: countRes.rows[0]?.likes_count || 0 };
+      const count = await client.query(`SELECT COUNT(*)::int AS likes_count FROM ${table} WHERE ${key} = $1`, [itemId]);
+      const targetTable = isReview ? 'reviews' : 'social_posts';
+      await client.query(`UPDATE ${targetTable} SET likes_count = $2 WHERE id = $1`, [itemId, count.rows[0].likes_count]);
+      await client.query('COMMIT');
+      return { isLiked, likes_count: count.rows[0].likes_count };
+    } catch (error) {
+      await client.query('ROLLBACK');
+      throw error;
+    } finally {
+      client.release();
     }
   }
 

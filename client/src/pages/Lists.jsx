@@ -25,6 +25,7 @@ export default function Lists() {
   const [lists, setLists] = useState([]);
   const [selectedList, setSelectedList] = useState(null);
   const [loading, setLoading] = useState(true);
+  const [likePending, setLikePending] = useState({});
   const [creating, setCreating] = useState(false);
   const [searchQuery, setSearchQuery] = useState('');
   const [searchResults, setSearchResults] = useState([]);
@@ -159,12 +160,16 @@ export default function Lists() {
 
   const handleToggleLike = async (listId) => {
     if (currentUser?.isGuest) return openAuthModal();
+    if (likePending[listId]) return;
+    setLikePending(prev => ({ ...prev, [listId]: true }));
 
     try {
       await axios.post(`/api/lists/${listId}/like`, { user_id: userId });
       fetchLists();
     } catch (e) {
       console.error(e);
+    } finally {
+      setLikePending(prev => ({ ...prev, [listId]: false }));
     }
   };
 

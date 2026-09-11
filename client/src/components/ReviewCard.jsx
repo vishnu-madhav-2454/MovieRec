@@ -28,6 +28,7 @@ export default function ReviewCard({ review, currentUser, onLikeToggle, onHelpfu
   const [newComment, setNewComment] = useState('');
   const [copied, setCopied] = useState(false);
   const [dmOpen, setDmOpen] = useState(false);
+  const [likePending, setLikePending] = useState(false);
 
   useEffect(() => {
     // Check for spoilers on mount
@@ -40,6 +41,8 @@ export default function ReviewCard({ review, currentUser, onLikeToggle, onHelpfu
   }, [review]);
 
   const handleLike = async () => {
+    if (likePending) return;
+    setLikePending(true);
     try {
       const res = await axios.post(`/api/reviews/${review.id}/like`, {
         userId: currentUser?.id || 1
@@ -49,6 +52,8 @@ export default function ReviewCard({ review, currentUser, onLikeToggle, onHelpfu
       if (onLikeToggle) onLikeToggle(review.id, res.data);
     } catch (e) {
       console.error(e);
+    } finally {
+      setLikePending(false);
     }
   };
 
@@ -181,6 +186,7 @@ export default function ReviewCard({ review, currentUser, onLikeToggle, onHelpfu
           <button
             type="button"
             onClick={handleLike}
+            disabled={likePending}
             className={`flex items-center gap-1 sm:gap-1.5 font-medium ${isLiked ? 'text-rose-400' : 'hover:text-rose-400'} transition-colors`}
           >
             <FiHeart className={`w-3.5 h-3.5 sm:w-4 sm:h-4 ${isLiked ? 'fill-rose-400' : ''}`} />
