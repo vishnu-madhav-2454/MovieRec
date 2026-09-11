@@ -21,7 +21,7 @@ import {
 
 export default function Messages() {
   const { userId: chatUserId } = useParams();
-  const { currentUser } = useAuth();
+  const { currentUser, openAuthModal } = useAuth();
   const navigate = useNavigate();
   const [conversations, setConversations] = useState([]);
   const [messages, setMessages] = useState([]);
@@ -155,7 +155,7 @@ export default function Messages() {
           <FiMessageCircle className="w-16 h-16 text-dark-600 mx-auto mb-4" />
           <h2 className="text-xl font-bold mb-2">Your Messages</h2>
           <p className="text-dark-400 text-sm mb-4">Sign in to send and receive messages</p>
-          <button className="bg-primary-600 text-white px-6 py-2 rounded-lg font-semibold">
+          <button onClick={openAuthModal} className="bg-primary-600 text-white px-6 py-2 rounded-lg font-semibold">
             Sign In
           </button>
         </div>
